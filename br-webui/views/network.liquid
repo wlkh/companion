@@ -256,6 +256,20 @@ socket.on('current ip', function(data) {
 					<button type="button" class="btn btn-primary"
 						id="eth0 ip button" onclick="setCompanionEthernetIP()">
 						Change Companion Default Ethernet IP</button>
+					<h4 id='config-heading'> Current Configuration: <span id="current-config"></span></h4>
+					<h4 id="configure"> Companion Network Settings: </h4>
+					<input type="radio" name="config" id="server"/><span id="server-name"> DHCP Server </span>
+					<br id='break1'></br>
+					<input type="radio" name="config" id="client"/><span id="client-name"> DHCP Client</span>
+					<br id='break2'></br>
+					<input type="radio" name="config" id="manual"/><span id="manual-name"> Manual</span>
+					<br id='break3'></br>
+					<button type="button" class="btn btn-primary"
+						id="configure button" onclick="setCompanionMode()">
+						Configure </button>
+					<button type="button" class="btn btn-primary"
+						id="manual button" onclick="setCompanionDefault()">
+						Reset to default </button>
 				</dl>
 			</div>
 		</div>
@@ -296,5 +310,47 @@ socket.on('current ip', function(data) {
 		</div>
 	</div>
 </div>
+
+<script>
+
+function setProperty() {
+	var check = document.getElementById('advanced-checkbox');
+	console.log('got into setproperty');
+	if (check.checked != true) {
+		document.getElementById('config-heading').style.display = 'none';
+		document.getElementById('configure').style.display = 'none';
+		document.getElementById('server-name').style.display = 'none';
+		document.getElementById('server').style.display = 'none';
+		document.getElementById('break1').style.display = 'none';
+		document.getElementById('client-name').style.display = 'none';
+		document.getElementById('client').style.display = 'none';
+		document.getElementById('break2').style.display = 'none';
+		document.getElementById('manual-name').style.display = 'none';
+		document.getElementById('manual').style.display = 'none';
+		document.getElementById('break3').style.display = 'none';
+		document.getElementById('configure button').style.display = 'none';
+		document.getElementById('manual button').style.display = 'none';
+	}
+	else {
+		document.getElementById('config-heading').style.display = 'block';
+		document.getElementById('configure').style.display = 'block';
+		document.getElementById('server-name').style.display = 'inline';
+		document.getElementById('server').style.display = 'inline';
+		document.getElementById('break1').style.display = 'inline';
+		document.getElementById('client-name').style.display = 'inline';
+		document.getElementById('client').style.display = 'inline';
+		document.getElementById('break2').style.display = 'inline';
+		document.getElementById('manual-name').style.display = 'inline';
+		document.getElementById('manual').style.display = 'inline';
+		document.getElementById('break3').style.display = 'inline';
+		document.getElementById('configure button').style.display = 'inline';
+		document.getElementById('manual button').style.display = 'inline';
+	}
+}
+
+setProperty();
+setInterval(setProperty, 500);
+
+</script>
 
 {% include ../_includes/footer.liquid %}

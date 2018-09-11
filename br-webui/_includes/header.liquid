@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="/js/jquery.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
@@ -49,12 +50,23 @@
 					<li><a href="/camera">Camera</a></li>
 					<li><a href="/routing">Routing</a></li>
 				</ul>
+				
 				<form class="navbar-form navbar-right">
 					<button onclick="reboot()" class="btn btn-primary btn-sm navbar-btn">Reboot</button>
 					<button onclick="shutdown()" class="btn btn-error btn-sm navbar-btn">Shutdown</button>
 				</form>
+				
 			</div><!--/.nav-collapse -->
+			<div>
+				<ul class="toggle">
+					<label class="switch">
+  						<input id='advanced-checkbox' type="checkbox">
+ 						<span class="slidernew round"></span>
+					</label>
+					Enable Advanced Options
+				</ul>
+			</div>
 		</div>
 	</nav>
-
+	<div class="heading"></div>
 	<div class="container">
