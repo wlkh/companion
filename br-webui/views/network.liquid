@@ -250,7 +250,7 @@ socket.on('current ip', function(data) {
 					Ethernet Setup
 				</h3>
 			</div>
-			<div class="panel-body">
+			<div class="panel-body" id="interesting-stuff">
 				<h4 id="ethernet-ip">Current IP:</h4>
 				<dl class="dl-horizontal">
 					<button type="button" class="btn btn-primary"
@@ -313,38 +313,10 @@ socket.on('current ip', function(data) {
 
 <script>
 
-function setProperty() {
-	var check = document.getElementById('advanced-checkbox');
-	console.log('got into setproperty');
-	if (check.checked != true) {
-		document.getElementById('config-heading').style.display = 'none';
-		document.getElementById('configure').style.display = 'none';
-		document.getElementById('server-name').style.display = 'none';
-		document.getElementById('server').style.display = 'none';
-		document.getElementById('break1').style.display = 'none';
-		document.getElementById('client-name').style.display = 'none';
-		document.getElementById('client').style.display = 'none';
-		document.getElementById('break2').style.display = 'none';
-		document.getElementById('manual-name').style.display = 'none';
-		document.getElementById('manual').style.display = 'none';
-		document.getElementById('break3').style.display = 'none';
-		document.getElementById('configure button').style.display = 'none';
-		document.getElementById('manual button').style.display = 'none';
-	}
-	else {
-		document.getElementById('config-heading').style.display = 'block';
-		document.getElementById('configure').style.display = 'block';
-		document.getElementById('server-name').style.display = 'inline';
-		document.getElementById('server').style.display = 'inline';
-		document.getElementById('break1').style.display = 'inline';
-		document.getElementById('client-name').style.display = 'inline';
-		document.getElementById('client').style.display = 'inline';
-		document.getElementById('break2').style.display = 'inline';
-		document.getElementById('manual-name').style.display = 'inline';
-		document.getElementById('manual').style.display = 'inline';
-		document.getElementById('break3').style.display = 'inline';
-		document.getElementById('configure button').style.display = 'inline';
-		document.getElementById('manual button').style.display = 'inline';
+function handleAdvancedSwitch(visibility) {
+	var div = document.getElementById("interesting-stuff");
+	for (var node in div.childNodes) {
+	   node.style.display = visibility
 	}
 }
 
