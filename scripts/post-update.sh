@@ -235,6 +235,24 @@ if ! git remote | grep -q local; then
     git remote add local ~/companion
 fi
 
+#Install isc-dhcp-server
+cd $HOME/companion
+echo "Checking for isc-dhcp-server..."
+while true
+do
+    if dpkg-query -W -f='${Status} ${Version}' isc-dhcp-server | grep 4.3; then
+        echo "Already installed"
+        sudo dpkg --configure -a
+        break
+    else
+        echo "Installing isc-dhcp-server"
+        sudo apt-get update --yes
+        sudo apt-get install isc-dhcp-server=4.3.* --yes
+        sudo dpkg --configure -a
+        echo "isc-dhcp-server installed"
+    fi
+done
+
 sudo sed -i '\%stopscreens%d' ~/.bash_aliases
 echo "alias stopscreens=\"screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill\"" >> ~/.bash_aliases
 
