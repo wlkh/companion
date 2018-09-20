@@ -1,22 +1,16 @@
 #!/bin/bash
 
-S1="iface eth0 inet static"
-S2="address 192.168.2.2"
-S3="netmask 255.255.255.0"
+#Bring down interface eth0
+sudo ifdown eth0
+echo "Interface eth0 is down"
 
-#Remove existing settings for all other configurations from /network/interfaces
-# e.g. sed -i -e '/pattern/,+#d', deletes any line containing the pattern and # number of lines after that.
-sudo sed -i -e '/iface eth0 inet manual/,+1d' /etc/network/interfaces
-sudo sed -i -e '/eth0 inet static/,+3d' /etc/network/interfaces
-sudo sed -i -e '/eth0 inet dhcp/,+1d' /etc/network/interfaces
-echo "Previous configuration settings removed from /network/interfaces"
+#Copy network configuration file from Companion directory to /etc/network/interfaces.d/
+cp /home/pi/companion/server_eth0 /etc/network/interfaces.d/
+echo "DHCP Server configuration file copied to /etc/network/interfaces.d directory"
 
-#Append configuration settings for dhcp-server at the end of /network/interfaces
-sudo sed -i -e "\$a$S1" \
--e "\$a$S2" \
--e "\$a$S3" \
-/etc/network/interfaces
-echo "Configuration settings for dhcp-server mode applied in network/interfaces"
+#Bring up eth0 with DHCP Server configuration
+sudo ifup eth0=config-server
+echo "Interface eth0 is up with DHCP Server configuration"
 
 #Add configuration settings for dhcp-server to dhcp/dhcpd.conf
 
