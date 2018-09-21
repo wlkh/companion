@@ -1,14 +1,14 @@
 #!/bin/bash
 
-if grep "iface eth0 inet manual" /etc/network/interfaces 1>/dev/null; then
+if [ ! -f /var/lib/dhcpcd5/dhcpcd-eth0.lease ]; then
 	echo "Manual"
 	exit 0
 fi
-if grep "iface eth0 inet static" /etc/network/interfaces 1>/dev/null; then
+if sudo service isc-dhcp-server status | grep "active (running)" 1>/dev/null; then
 	echo "DHCP Server"
 	exit 0
 fi
-if grep "iface eth0 inet dhcp" /etc/network/interfaces 1>/dev/null; then 
+if [ -f /var/lib/dhcpcd5/dhcpcd-eth0.lease ]; then 
 	echo "DHCP Client"
 	exit 0
 fi

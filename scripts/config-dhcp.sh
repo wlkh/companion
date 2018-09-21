@@ -4,10 +4,6 @@
 sudo ifdown eth0
 echo "Interface eth0 is down"
 
-#Copy network configuration file from Companion directory to /etc/network/interfaces.d/
-cp /home/pi/companion/server_eth0 /etc/network/interfaces.d/
-echo "DHCP Server configuration file copied to /etc/network/interfaces.d directory"
-
 #Bring up eth0 with DHCP Server configuration
 sudo ifup eth0=config-server
 echo "Interface eth0 is up with DHCP Server configuration"
