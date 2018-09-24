@@ -1,3 +1,5 @@
 #Add network configuration settings for Manual mode
 
-iface config-manual inet manual
+iface config-manual inet static
+ address 192.168.2.2
+ netmask 255.255.255.0
