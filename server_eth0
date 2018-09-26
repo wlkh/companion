@@ -1,5 +1,0 @@
-#Add network configuration settings for DHCP Server
-
-iface config-server inet static
-address 192.168.2.2
-netmask 255.255.255.0

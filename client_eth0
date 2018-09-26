@@ -1,4 +1,0 @@
-#Add network configuration settings for DHCP Client
-
-iface config-client inet dhcp
-
