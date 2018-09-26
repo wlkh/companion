@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-echo "config-manual"
+if [ -f "/home/pi/network-conf" ]; then 
+    cat /home/pi/network-conf
+else
+	echo "config-manual"
+fi
+
