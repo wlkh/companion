@@ -257,8 +257,17 @@ done
 # e.g. sed command removes any ip address with any combination of digits [0-9] between decimal points
 sudo sed -i -e 's/\s*ip=[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*//' /boot/cmdline.txt
 
-#Copy network configuration files from Companion directory to /etc/network/interfaces.d/
-sudo cp /home/pi/companion/{manual_eth0,server_eth0,client_eth0} /etc/network/interfaces.d/
+#Copy network configuration files from Companion directory to respective configuration directories
+sudo cp /home/pi/companion/eth0-config /etc/network/interfaces.d/
+sudo cp /home/pi/companion/isc-dhcp-server /etc/default/
+sudo cp /home/pi/companion/dhcpd.conf /etc/dhcp/
+sudo cp /home/pi/companion/interfaces /etc/network/
+
+#Copy mapping script from companion directory to home directory
+cp /home/pi/companion/mapit.sh /home/pi
+
+#Copy network configuration information to network-conf
+cp /home/pi/companion/network-conf /home/pi
 
 sudo sed -i '\%stopscreens%d' ~/.bash_aliases
 echo "alias stopscreens=\"screen -ls | grep Detached | cut -d. -f1 | awk '{print \$1}' | xargs kill\"" >> ~/.bash_aliases
