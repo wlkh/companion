@@ -3,6 +3,13 @@
 #copy the configuration information to network-conf.txt
 echo "config-server" > /home/pi/network-conf
 
+#Remove old configuration information if exists from default file
+sudo sed -i '/INTERFACES=/d' /etc/default/isc-dhcp-server 
+
+#Source configuration for dhcp server in the default configuration files
+sudo sh -c "echo 'include "/home/pi/dhcp-server-conf";' >> /etc/dhcp/dhcpd.conf"
+sudo sh -c "echo '. /home/pi/dhcp-server-default' >> /etc/default/isc-dhcp-server"
+
 #Bring down interface eth0
 sudo ifdown eth0
 echo "Interface eth0 is down"

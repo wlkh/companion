@@ -259,9 +259,9 @@ sudo sed -i -e 's/\s*ip=[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*//' /boot/cmdline.txt
 
 #Copy network configuration files from Companion directory to respective configuration directories
 sudo cp /home/pi/companion/eth0-config /etc/network/interfaces.d/
-sudo cp /home/pi/companion/isc-dhcp-server /etc/default/
-sudo cp /home/pi/companion/dhcpd.conf /etc/dhcp/
 sudo cp /home/pi/companion/interfaces /etc/network/
+cp /home/pi/companion/dhcp-server-conf /home/pi
+cp /home/pi/companion/dhcp-server-defaults /home/pi 
 
 #Copy mapping script from companion directory to home directory
 cp /home/pi/companion/mapit.sh /home/pi
