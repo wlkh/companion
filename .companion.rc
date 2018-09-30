@@ -27,6 +27,7 @@ if [ ! -f /home/pi/.updating ]; then
 	sudo -H -u pi screen -dm -S bridgemanager $COMPANION_DIR/tools/ping360_bridge_manager.py
 	sudo -H -u pi screen -dm -S mavlink2rest $COMPANION_DIR/tools/mavlink2rest --connect udpin:127.0.0.1:9002 --server 0.0.0.0:4777
 	$COMPANION_DIR/scripts/start-ardusub-linux.sh || true
+	sudo -H -u pi screen -dm -S janus /opt/janus/bin/janus
 else
 	sudo -H -u pi echo 'UPDATE FAILED!' >> /home/pi/.update_log
 	rm -f /home/pi/.updating

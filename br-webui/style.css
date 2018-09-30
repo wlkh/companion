@@ -103,8 +103,18 @@ input:checked + .slidernew:before {
   color: white;
 }
 
+<<<<<<< HEAD
 /* removes margins from navbar form so the bar stays thin*/
 .navbar-form {
   margin-top: 0;
   margin-bottom: 0;
+}
+/* Forces video to fit avalaible area */
+#remotevideo0 {
+  width: 100%;
+}
+
+/* Removes the element padding */
+.padding-less {
+  padding: 0;
 }

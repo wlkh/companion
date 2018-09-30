@@ -23,6 +23,7 @@ app.use('/js', express.static(__dirname + '/node_modules/bootstrap-select/dist/j
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap-select/dist/css'));
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap-slider/dist'));
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap-slider/dist/css'));
+app.use('/js', express.static(__dirname + '/static/js'));
 
 var fs = require("fs");
 var expressLiquid = require('express-liquid');
