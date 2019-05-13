@@ -55,7 +55,7 @@ class SerialEndpoint(Endpoint):
 		# not a socket! just a port
 		self.socket = serial.Serial()
 		self.socket.port = port
-		self.socket.baudrate = 115200
+		self.socket.baudrate = baudrate
 		self.socket.timeout = 0
 		
 		
