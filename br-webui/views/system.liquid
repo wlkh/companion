@@ -236,10 +236,15 @@ socket.on('cpu stats', function(data) {
 	}
 
 	// display data
+	var ram_percentage = (data.ram_used/data.ram_total * 100).toFixed(0);
+	document.getElementById('ramFree').innerHTML = data.ram_used.toFixed(0) + 'MB/' + data.ram_total.toFixed(0) + 'MB (' + ram_percentage+ '% used)';
+
 	document.getElementById('cpuLoad').innerHTML = _cpu_load + '%';
-	document.getElementById('ramFree').innerHTML = data.ram_free.toFixed(3) + ' MB';
-	document.getElementById('ramUsed').innerHTML = data.ram_used.toFixed(3) + ' MB';
-	document.getElementById('ramTotal').innerHTML = data.ram_total.toFixed(3) + ' MB';
+
+	var disk_used = (data.disk_used/1048576).toFixed(1)
+	var disk_total = (data.disk_total/1048576).toFixed(1)
+	document.getElementById('diskStatus').innerHTML = disk_used + 'GB/' + disk_total + 'GB  (' + data.disk_use_percentage + ' used)';
+
 	document.getElementById('cpuStatus').innerHTML = data.cpu_status;
 });
 </script>
@@ -433,12 +438,10 @@ socket.on('cpu stats', function(data) {
 				<dl class="dl-horizontal">
 					<dt>CPU Load: </dt>
 						<dd id="cpuLoad"></dd>
-					<dt>Free RAM: </dt>
+					<dt>RAM: Usage</dt>
 						<dd id="ramFree"></dd>
-					<dt>Used RAM: </dt>
-						<dd id="ramUsed"></dd>
-					<dt>Total RAM: </dt>
-						<dd id="ramTotal"></dd>
+					<dt>Disk Usage: </dt>
+						<dd id="diskStatus"></dd>
 					<dt>CPU Status: </dt>
 						<dd id="cpuStatus"></dd>
 				</dl>
