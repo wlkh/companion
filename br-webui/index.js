@@ -834,7 +834,13 @@ function updateCPUStats () {
 		}
 
 		// stream collected data
-		io.emit('cpu stats', cpu_stats);
+		getDiskStatus(function(data) {
+			cpu_stats.disk_free = data[3];
+			cpu_stats.disk_total = data[1];
+			cpu_stats.disk_used = data[2]
+			cpu_stats.disk_use_percentage = data[4];
+			io.emit('cpu stats', cpu_stats);
+		})
 	})
 }
 
@@ -842,6 +848,14 @@ function getCpuStatus(callback) {
 	var cmd = child_process.exec('vcgencmd get_throttled', function (error, stdout, stderr) {
 		logger.log("Got CPU Status: ", error, stdout, stderr);
 		callback(stdout);
+	});
+}
+
+function getDiskStatus(callback) {
+	child_process.exec("df /", function (error, stdout, stderr) {
+		logger.log("Got Disk Status: ", error, stdout, stderr);
+		var data = stdout.split("\n")[1].match(/\S+/g);
+		callback(data);
 	});
 }
 
