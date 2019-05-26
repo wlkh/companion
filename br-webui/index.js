@@ -713,7 +713,9 @@ networking.on('connection', function(socket) {
 		}
 		
 		try {
-			cmd = child_process.execSync('sudo wpa_cli scan_results | grep PSK | cut -f5 | grep .');
+			// The regex here matches bytes escaped by a backslash, such as \xf3 or \x23 and replaces them
+			// with the char resulting of encoding the byte. The extra backslashes are for escaping (string in a string)
+			cmd = child_process.execSync("sudo wpa_cli scan_results | grep PSK | cut -f5 | perl -pe 's/\\\\x([\\\da-f]{2})/chr(hex($1))/gie' |  grep .");
 			logger.log("wpa_cli scan_results: ", cmd.toString());
 			socket.emit('wifi aps', cmd.toString().trim().split("\n"));
 		} catch (e) {
@@ -724,7 +726,9 @@ networking.on('connection', function(socket) {
 	
 	socket.on('get wifi status', function() {
 		logger.log("get wifi status");
-		var cmd = child_process.exec('sudo wpa_cli status', function (error, stdout, stderr) {
+		// The regex here matches bytes escaped by a backslash, such as \xf3 or \x23 and replaces them
+		// with the char resulting of encoding the byte. The extra backslashes are for escaping (string in a string)
+		var cmd = child_process.exec("sudo wpa_cli status | perl -pe 's/\\\\x([\\\da-f]{2})/chr(hex($1))/gie'", function (error, stdout, stderr) {
 			logger.log("sudo wpa_cli status : ", error + stdout + stderr);
 			if (error) {
 				socket.emit('wifi status', '<h4 style="color:red;">Error: ' + stderr + '</h1>');
