@@ -795,6 +795,8 @@ function updateCPUStats () {
 	cpu_stats.ram_total = os.totalmem()/(1024*1024); // MB
 	cpu_stats.ram_used	= cpu_stats.ram_total - cpu_stats.ram_free; // MB
 
+	cpu_stats.uptime = child_process.execSync("uptime -p").toString().substring(3);
+
 	cpu_stats.cpu_status    = ""
 	// Get cpu status
 	getCpuStatus(function(status) {
