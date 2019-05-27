@@ -246,6 +246,8 @@ socket.on('cpu stats', function(data) {
 	document.getElementById('diskStatus').innerHTML = disk_used + 'GB/' + disk_total + 'GB  (' + data.disk_use_percentage + ' used)';
 
 	document.getElementById('cpuStatus').innerHTML = data.cpu_status;
+
+	document.getElementById('uptime').innerHTML = data.uptime;
 });
 </script>
 
@@ -436,6 +438,8 @@ socket.on('cpu stats', function(data) {
 			</div>
 			<div class="panel-body">
 				<dl class="dl-horizontal">
+					<dt>Uptime: </dt>
+						<dd id="uptime"></dd>
 					<dt>CPU Load: </dt>
 						<dd id="cpuLoad"></dd>
 					<dt>RAM: Usage</dt>
