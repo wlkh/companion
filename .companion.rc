@@ -38,3 +38,4 @@ else
 	echo 'Trying to run again...' >> /home/pi/.update_log
 	$COMPANION_DIR/.companion.rc
 fi
+while true; do sleep 2; done
