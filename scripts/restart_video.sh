@@ -12,6 +12,6 @@ echo $2 >> /home/pi/vidformat.param
 echo $3 >> /home/pi/vidformat.param
 echo $4 >> /home/pi/vidformat.param
 
-sudo -H -u pi screen -dm -S video /home/pi/companion/tools/streamer.py
+sudo -H -u root screen -dm -S video /home/pi/companion/tools/streamer.py
 
 
