@@ -243,5 +243,7 @@ while True:
             pass # no data available for udp read
         else:
             print(e)
+    except KeyError as e:
+        print("Warning: error getting a key from MAVProxy/DepthOutput:", e.args[0])
 
     time.sleep(0.02)
