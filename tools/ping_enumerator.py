@@ -6,18 +6,18 @@
 """
 from __future__ import print_function
 import subprocess
-from brping import *
+from brping import PingDevice
+from brping.definitions import *
 import serial
 import time
 
 class PingEnumerator:
-    ser = None
 
-    def legacy_detect_ping1d(self):
+    def legacy_detect_ping1d(self, ping):
         """
         Detects Ping1D devices without DEVICE_INFORMATION implemented
         """
-        firmware_version = self.request_message(PING1D_FIRMWARE_VERSION)
+        firmware_version = ping.request(PING1D_FIRMWARE_VERSION)
         if firmware_version is None  or not hasattr(firmware_version, "device_type"):
             return None
         description = "/dev/serial/ping/Ping1D-id-%s-t-%s-m-%s-v-%s.%s" % (
@@ -29,27 +29,6 @@ class PingEnumerator:
         )
         return description
 
-    def request_message(self, requested_id):
-        print("Requesting ", requested_id)
-        timeout = time.time() + 1
-        p = PingParser()
-        device_info = None
-        while device_info is None and time.time() < timeout:
-            m = PingMessage(PING1D_GENERAL_REQUEST)
-            m.requested_id = requested_id
-            m.pack_msg_data()
-            self.ser.write(m.msg_data)
-            time.sleep(0.01)
-            while self.ser.in_waiting:
-                if p.parse_byte(self.ser.read()) == PingParser.NEW_MESSAGE:
-                    msg = p.rx_msg
-                    #print(device_info)
-                    if msg.message_id == requested_id:
-                        return msg
-        print("No valid response!")
-        return None
-
-
     def detect_device(self, dev):
         """
         Attempts to detect the Ping device attached to serial port 'dev'
@@ -57,11 +36,13 @@ class PingEnumerator:
         device was not detected
         """
 
-        self.ser = serial.Serial("/dev/serial/by-id/" + dev, 115200)
-        device_info = self.request_message(PING1D_DEVICE_INFORMATION)
+        ping = PingDevice("/dev/serial/by-id/" + dev, 115200)
+        if not ping.initialize():
+            return None
 
+        device_info = ping.request(COMMON_DEVICE_INFORMATION)
         if not device_info or not hasattr(device_info, "device_type"):
-            return self.legacy_detect_ping1d()
+            return self.legacy_detect_ping1d(ping)
 
         if device_info.device_type == 1:
             description = "/dev/serial/ping/Ping1D-id-%s-r-%s-v-%s.%s.%s"
@@ -160,7 +141,6 @@ class PingEnumerator:
                 self.make_symlink(dev, link)
             else:
                 print("Unable to identify device at ", dev)
-            self.ser.close()
 
 
 if __name__ == '__main__':
