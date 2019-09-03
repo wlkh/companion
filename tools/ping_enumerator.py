@@ -18,7 +18,7 @@ class PingEnumerator:
         Detects Ping1D devices without DEVICE_INFORMATION implemented
         """
         firmware_version = ping.request(PING1D_FIRMWARE_VERSION)
-        if firmware_version is None  or not hasattr(firmware_version, "device_type"):
+        if firmware_version is None:
             return None
         description = "/dev/serial/ping/Ping1D-id-%s-t-%s-m-%s-v-%s.%s" % (
             firmware_version.src_device_id,
@@ -41,7 +41,7 @@ class PingEnumerator:
             return None
 
         device_info = ping.request(COMMON_DEVICE_INFORMATION)
-        if not device_info or not hasattr(device_info, "device_type"):
+        if not device_info:
             return self.legacy_detect_ping1d(ping)
 
         if device_info.device_type == 1:
@@ -52,7 +52,7 @@ class PingEnumerator:
             print("Setting baud to 2M...")
             ser = serial.Serial("/dev/serial/by-id/" + dev, 2000000)
             ser.send_break()
-            ser.write("UUUUUUU")
+            ser.write("UUUUUUU".encode())
             ser.close()
             self.set_low_latency(dev)
 
@@ -73,7 +73,7 @@ class PingEnumerator:
         maps to it to ttyUSB and sets the latency_timer for the device
         """
         target_device = subprocess.check_output(' '.join(["readlink", "-f", "/dev/serial/by-id/%s" % dev]), shell=True)
-        device_name = target_device.split("/")[-1].strip()
+        device_name = target_device.decode().strip().split("/")[-1]
 
         latency_file = "/sys/bus/usb-serial/devices/{0}/latency_timer".format(device_name)
 
