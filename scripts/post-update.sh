@@ -284,6 +284,13 @@ if (( $PRE_0_0_17 > 0 )); then
     sudo cp $HOME/companion/params/100.autopilot.rules /etc/udev/rules.d/
 fi
 
+# Check pre-0.0.18 to update bluerobotics-ping
+PRE_0_0_18=$(( git rev-list --count --left-right 0.0.18...revert-point || echo 0 ) | cut -f1)
+
+if (( $PRE_0_0_18 > 0 )); then
+    sudo pip install bluerobotics-python==0.0.9 --upgrade --force-reinstall
+fi
+
 echo 'Update Complete, refresh your browser'
 
 sleep 0.1
