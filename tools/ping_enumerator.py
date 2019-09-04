@@ -128,20 +128,16 @@ class PingEnumerator:
             return []
 
 
-    def __init__(self):
-        """Main function
-            Enumerate new ping devices
-        """
-        self.erase_old_symlinks()
-
-        # Look at each serial device, probe for ping
-        for dev in self.list_serial_devices():
-            link = self.detect_device(dev)
-            if link:
-                self.make_symlink(dev, link)
-            else:
-                print("Unable to identify device at ", dev)
 
 
 if __name__ == '__main__':
-    PingEnumerator()
+    enumerator = PingEnumerator()
+    enumerator.erase_old_symlinks()
+
+    # Look at each serial device, probe for ping
+    for dev in enumerator.list_serial_devices():
+        link = enumerator.detect_device(dev)
+        if link:
+            enumerator.make_symlink(dev, link)
+        else:
+            print("Unable to identify device at ", dev)
