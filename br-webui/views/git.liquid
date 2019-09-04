@@ -121,8 +121,10 @@ function buildRefOptions (refs) {
 		var remoteLabel = document.createElement('h4');
 		remoteLabel.innerHTML = "\t" + name + " (" + refs.remotes[name].url + ")";
 		remoteLabel.style.display = "inline";
+		remoteLabel.style.cursor = "pointer";
 		var authenticateButton = document.createElement("h4");
 		authenticateButton.style.display = "inline";
+		authenticateButton.style.display = "pointer";
 		
 		if (!refs.remotes[name].authenticated) {
 			
@@ -139,6 +141,7 @@ function buildRefOptions (refs) {
 		
 		var removeButton = document.createElement('h4');
 		removeButton.style.display = "inline";
+		removeButton.style.cursor = "pointer";
 		removeButton.innerHTML ='&nbsp;<i class="fa fa-trash" aria-hidden="true"></i>';
 		removeButton.onclick = (function() { 
 				// Thank you https://stackoverflow.com/questions/3495679/passing-parameters-in-javascript-onclick-event
@@ -164,6 +167,7 @@ function buildRefOptions (refs) {
 		
 		// collapsable branch list
 		var branchesLabel = document.createElement('h5');
+		branchesLabel.style.cursor = "pointer";
 		branchesLabel.innerHTML = 'Branches';
 		var branchesDiv = document.createElement('div');
 		branchesDiv.className = "collapse";
@@ -194,6 +198,7 @@ function buildRefOptions (refs) {
 				'branch' : branchName
 			}
 			//el.onclick = "selectChoice(this);";
+			el.style.cursor = "pointer";
 			// el.onclick = selectChoice(el); // easy, but doesn't work
 			branchesList.appendChild(el);
 		});
@@ -201,6 +206,7 @@ function buildRefOptions (refs) {
 		
 		// collapsable tag list
 		var tagsLabel = document.createElement('h5');
+		tagsLabel.style.cursor = "pointer";
 		tagsLabel.innerHTML = 'Tags';
 		var tagsDiv = document.createElement('div');
 		tagsDiv.className = "collapse";
@@ -220,6 +226,7 @@ function buildRefOptions (refs) {
 			var oid = tagRef[1];
 			
 			el = document.createElement('li');
+			el.style.cursor = "pointer";
 			el.innerHTML = tagName + '   ' + oid;
 			el.onclick = function(event) {
 				console.log(event.target.gitName);
@@ -259,6 +266,7 @@ function selectChoice(choiceElement) {
 	}
 	_choiceElement = choiceElement;
 	choiceElement.style.backgroundColor = "yellow";
+	choiceElement.style.cursor = "pointer";
 	console.log(_choiceElement.style);
 }
 
