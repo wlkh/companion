@@ -139,17 +139,6 @@ if ! ssh-keygen -H -F github.com; then
     fi
 fi
 
-sudo pip install bluerobotics-ping==0.0.7
-
-# If "pip install bluerobotics-ping" failed:
-if [ $? -ne 0 ]; then
-    echo 'Failed to install bluerobotics-ping; Aborting update'
-    echo 'Rebooting to repair installation, this will take a few minutes'
-    echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
-    sleep 0.1
-    sudo reboot
-fi
-
 # install pynmea2 if neccessary
 if pip list | grep pynmea2; then
     echo 'pynmea2 already installed'
@@ -281,6 +270,17 @@ fi
 PRE_0_0_17=$(( git rev-list --count --left-right 0.0.17...revert-point || echo 0 ) | cut -f1)
 
 if (( $PRE_0_0_17 > 0 )); then
+    sudo pip install bluerobotics-ping==0.0.7
+
+    # If "pip install bluerobotics-ping" failed:
+    if [ $? -ne 0 ]; then
+        echo 'Failed to install bluerobotics-ping; Aborting update'
+        echo 'Rebooting to repair installation, this will take a few minutes'
+        echo 'Please DO NOT REMOVE POWER FROM THE ROV! (until QGC makes a connection again)'
+        sleep 0.1
+        sudo reboot
+    fi
+
     sudo cp $HOME/companion/params/100.autopilot.rules /etc/udev/rules.d/
 fi
 
