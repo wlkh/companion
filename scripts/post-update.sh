@@ -291,6 +291,13 @@ if (( $PRE_0_0_18 > 0 )); then
     sudo pip install bluerobotics-ping==0.0.9 --upgrade --force-reinstall
 fi
 
+# Check pre-0.0.19 to update the default network configuration
+PRE_0_0_19=$(( git rev-list --count --left-right 0.0.18...revert-point || echo 0 ) | cut -f1)
+
+if (( $PRE_0_0_19 > 0 )); then
+    echo "config-server" > /home/pi/network.conf
+fi
+
 echo 'Update Complete, refresh your browser'
 
 sleep 0.1
