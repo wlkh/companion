@@ -120,3 +120,11 @@ input:checked + .slidernew:before {
   font-size: small;
   color:white
 }
+
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-default {
+    font-size: small !important;
+}
+
+.btn {
+    font-size: smaller;
+}
