@@ -90,10 +90,11 @@ try {
 
 // Create camera objects, set all camera settings on all cameras to the
 // last known settings
-for (var i = 0; ;i++) {
+for (var i = 0; i<10 ;i++) {
 	try {
 		var cam = new v4l2camera.Camera("/dev/video" + i)
 		logger.log("found camera:", i);
+		console.log(JSON.stringify(cam, null, 2))
 		
 		// TODO put this in driver layer
 		cam.controls.forEach(function(control) {
@@ -138,7 +139,6 @@ for (var i = 0; ;i++) {
 				}
 			});
 		});
-		break;
 	}
 }
 
@@ -890,7 +890,7 @@ io.on('connection', function(socket) {
 			var fields = file_data.split("\n");
 			
 			_activeFormat = { "frameSize": fields[0] + "x" + fields[1], "frameRate": fields[2], "device": fields[3], "format": "H264" }
-						
+			console.log(_cameras);
 			socket.emit('v4l2 cameras', {
 				"cameras": _cameras,
 				"activeFormat": _activeFormat,
@@ -898,6 +898,7 @@ io.on('connection', function(socket) {
 			});
 		} catch(err) {
 			logger.log("error reading format file");
+			console.log(err)
 		}
 	});
 	
