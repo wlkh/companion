@@ -688,7 +688,7 @@ networking.on('connection', function(socket) {
 	socket.on('get wifi aps', function() {
 		logger.log("get wifi aps");
 		try {
-			var cmd = child_process.execSync('sudo wpa_cli scan');
+			var cmd = child_process.execSync('sudo wpa_cli scan -i wlan0');
 			logger.log("sudo wpa_cli scan : ", cmd.toString());
 		} catch (e) {
 			logger.error("wpa_cli scan failed!", e.stderr.toString(), e);
