@@ -2,6 +2,7 @@
 <html>
 <head>
 	<script src="/js/jquery.min.js"></script>
+	<script src="/js/popper.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="socket.io-file-client.js"></script> 
@@ -27,7 +28,7 @@
 		}
 
 		socket.on('companion version', function(data) {
-			document.getElementById('companion version1').innerHTML = data;
+			document.getElementById('companionversion1').innerHTML = data;
 			console.log('got version in header')
 		});
 		socket.emit('get companion version');
@@ -38,31 +39,27 @@
 	<link rel="stylesheet" href="/style.css">
 </head>
 <body>
-	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#" style="color:white">ArduSub Companion Computer Setup</a>
-				<p class="text" style="color:white">
-					Companion Version:
-					<span id="companion version1"></span>
-				</p> 
-			</div>
-			<div id="navbar" class="collapse navbar-collapse" align="right">
-				<ul class="nav navbar-nav">
-					<li><a href="/network">Network</a></li>
-					<li><a href="/system">System</a></li>
-					<li><a href="/camera">Camera</a></li>
-					<li><a href="/routing">Routing</a></li>
-				</ul>
-				<form class="navbar-form navbar-right">
+    <header>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">ArduSub Companion Computer Setup</a>
+		<p id="version" class="text">
+			Companion Version:
+			<span id="companionversion1"></span>
+		</p>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav mr-auto" align="right">
+					<li><a class="nav-link" href="/network">Network</a></li>
+					<li><a class="nav-link" href="/system">System</a></li>
+					<li><a class="nav-link" href="/camera">Camera</a></li>
+					<li><a class="nav-link" href="/routing">Routing</a></li>
+          </ul>
+		  <form class="navbar-form navbar-right">
 					<button onclick="reboot()" class="btn btn-primary btn-sm navbar-btn">Reboot</button>
-					<button onclick="shutdown()" class="btn btn-error btn-sm navbar-btn">Shutdown</button>
+					<button onclick="shutdown()" class="btn btn-danger btn-sm navbar-btn">Shutdown</button>
 				<ul class="toggle">
 					<label class="switch">
 						<input id='advanced-checkbox' type="checkbox">
@@ -70,9 +67,9 @@
 					</label>
 					Enable Advanced Options
 				</ul>
-				</form>
-			</div><!--/.nav-collapse -->
-		</div>
-	</nav>
+			</form>
+        </div>
+      </nav>
+    </header>
 
 	<div class="container">

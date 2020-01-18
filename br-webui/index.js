@@ -12,6 +12,7 @@ logger.log('HOME_DIR', process.env.HOME)
 app.use(express.static('public'));
 app.use('/webui.log', express.static(home_dir+'/.webui.log'));
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // redirect bootstrap JS
+app.use('/js', express.static(__dirname + '/assets/js')); // redirect popper JS
 app.use('/js', express.static(__dirname + '/node_modules/jquery/dist')); // redirect JS jQuery
 app.use('/font-awesome', express.static(__dirname + '/node_modules/font-awesome')); // redirect JS jQuery
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css')); // redirect CSS bootstrap

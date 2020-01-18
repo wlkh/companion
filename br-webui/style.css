@@ -108,3 +108,15 @@ input:checked + .slidernew:before {
   margin-top: 0;
   margin-bottom: 0;
 }
+
+.container {
+  margin-top: 40px;
+}
+
+#version {
+  display: block;
+  position: absolute;
+  top: 65px;
+  font-size: small;
+  color:white
+}
