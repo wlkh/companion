@@ -9,6 +9,16 @@ var home_dir = process.env.HOME
 logger.log('ENVIRONMENT', process.env)
 logger.log('COMPANION_DIR', process.env.COMPANION_DIR)
 logger.log('HOME_DIR', process.env.HOME)
+
+if (process.env.COMPANION_DIR === undefined) {
+	console.log("COMPANION_DIR environment variable is not set! Set it and try again.")
+	process.exit()
+}
+if (process.env.COMPANION_DIR === undefined) {
+	console.log("HOME environment variable is not set! Set it and try again.")
+	process.exit()
+}
+
 app.use(express.static('public'));
 app.use('/webui.log', express.static(home_dir+'/.webui.log'));
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js')); // redirect bootstrap JS
