@@ -430,13 +430,11 @@ socket.on('cpu stats', function(data) {
 <!-- Companion Computer Status -->
 <div class="row">
 	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">
-					Companion Computer Status
-				</h3>
+		<div class="card card-default">
+			<div class="card-header">
+				Companion Computer Status
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<dl class="dl-horizontal">
 					<dt>Uptime: </dt>
 						<dd id="uptime"></dd>
@@ -455,13 +453,11 @@ socket.on('cpu stats', function(data) {
 </div>
 <div class="row">
 	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">
+		<div class="card card-default">
+			<div class="card-header">
 					Active Services
-				</h3>
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<dl class="dl-horizontal">
 					<div id="screenContent"></div>
 				</dl>
@@ -471,13 +467,11 @@ socket.on('cpu stats', function(data) {
 </div>
 <div class="row">
 	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">
+		<div class="card card-default">
+			<div class="card-header">
 					Detected Devices
-				</h3>
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<dl class="dl-horizontal">
             		<div id="deviceContent"></div>
 				</dl>
@@ -487,15 +481,13 @@ socket.on('cpu stats', function(data) {
 </div>
 <div class="row">
 	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">
+		<div class="card card-default">
+			<div class="card-header">
 					Companion Software Status
-					<i id="companionSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
-					<span id="companionProgress"></span>
-				</h3>
+				<i id="companionSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
+				<span id="companionProgress"></span>
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<h4>Version: </h4>
 				<span id="companion version">Companion Version</span>
 				<div>
@@ -514,15 +506,13 @@ socket.on('cpu stats', function(data) {
 
 <div class="row">
 	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">
-					Pixhawk Firmware Update
-					<i id="pixhawkSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
-					<span id="pixhawkProgress"></span>
-				</h3>
+		<div class="card card-default">
+			<div class="card-header">
+				Pixhawk Firmware Update
+				<i id="pixhawkSpinner" class="fa fa-refresh fa-spin fa-2x fa-fw" style="visibility:hidden;"></i>
+				<span id="pixhawkProgress"></span>
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<div>
 					<h4> ArduSub Version: </h4>
 					<span id="ardusub version"></span>
@@ -561,13 +551,11 @@ socket.on('cpu stats', function(data) {
 </div>
 <div class="row">
 	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">
-					System Log
-				</h3>
+		<div class="card card-default">
+			<div class="card-header">
+                System Log
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<a href="/webui.log" download>
 				<button type="button" class="btn btn-primary" style="height: 35px; width: 185px; display:table-cell">
 					Download System Log
