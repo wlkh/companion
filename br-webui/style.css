@@ -128,3 +128,7 @@ input:checked + .slidernew:before {
 .btn {
     font-size: smaller;
 }
+
+div.card {
+    margin-bottom: 30px;
+}
