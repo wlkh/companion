@@ -256,6 +256,7 @@
 			
 			var h5 = document.createElement('h5');
 			h5.innerHTML = control.name;
+			h5.className = "cameraparameter"
 
 			if (control.type == "bool") {
 				new_element.type = "checkbox";
@@ -283,7 +284,8 @@
 				}
 			} else if (control.type == "int" || control.type == "int_menu") {
 				var h6 = document.createElement('h6');
-				h6.style.display = "inline";
+				h6.style = "margin-right: 50%; float: right;"
+				h6.className = "cameraparameter"
 				h6.innerHTML = "\t" + control.value;
 				h5.appendChild(h6);
 	
@@ -348,7 +350,7 @@
 
 			} else if (control.type == "class") {
 				h5.innerHTML = "";
-				new_element = document.createElement("h4");
+				new_element = document.createElement("h5");
 				new_element.innerHTML = control.name;
 			} else {
 				console.log('skipping unsupported type:', control.name, control.type);
@@ -521,7 +523,7 @@
 	<div class="col-md-6">
 		<div class="card card-default">
 			<div class="card-header">
-				<h4>Camera Settings</h4>
+				<h4>Camera Settings</h>
 			</div>
 			<div class="card-body">
 					<h4>Preset Profile:

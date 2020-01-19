@@ -132,3 +132,8 @@ input:checked + .slidernew:before {
 div.card {
     margin-bottom: 30px;
 }
+
+h6.cameraparameter, h5.cameraparameter {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
