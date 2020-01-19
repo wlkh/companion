@@ -44,9 +44,9 @@ socket.on('internet status', function(data) {
 	console.log(data);
 	var statusIndicator = document.getElementById("internet-status");
 	if (data == true) {
-		statusIndicator.innerHTML = '<h4 style="color:green;">Connected</h1>';
+		statusIndicator.innerHTML = '<h5 style="color:green;">Connected</h5>';
 	} else {
-		statusIndicator.innerHTML = '<h4 style="color:red;">Not Connected</h1>';
+		statusIndicator.innerHTML = '<h5 style="color:red;">Not Connected</h5>';
 	}
 });
 
@@ -266,19 +266,19 @@ socket.on('current ip', function(data) {
 
 </script>
 
-<h1>Network Setup</h1>
+<h3>Network Setup</h3>
 <!-- Wifi Setup -->
 <div class="row">
 	<div class="col-md-6">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">Wifi Setup</h3>
+		<div class="card panel-default">
+			<div class="card-header">
+				Wifi Setup
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<form onsubmit="joinNetwork(); return false">
-					<h3>Wifi SSID:</h3>
+					<h5>Wifi SSID:</h5>
 					<select class="form-control" id="ssid" style="width: 200px;"></select>
-					<h3>Password:</h3>
+					<h5>Password:</h5>
 					<div class="form-group">
 						<input class="form-control" id="password" type="password" style="width: 200px;" />
 						<button id="joinButton" type="submit" class="btn btn-primary">Join Network</button>
@@ -289,15 +289,15 @@ socket.on('current ip', function(data) {
 		</div>
 	</div>
 	<div class="col-md-6">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">Wifi Status</h3>
+		<div class="card card-default">
+			<div class="card-header">
+				Wifi Status
 			</div>
-			<div class="panel-body">
-				<h3>Wifi Status:</h3>
-				<h4><span id="wifi-status">Pending</span></h4>
-				<h3>Internet Status:</h3>
-				<h4><span id="internet-status">Pending</span></h4>
+			<div class="card-body">
+				<h5>Wifi Status:</h5>
+				<h5><span id="wifi-status">Pending</span></h5>
+				<h5>Internet Status:</h5>
+				<h5><span id="internet-status">Pending</span></h5>
 			</div>
 		</div>
 	</div>
@@ -306,31 +306,29 @@ socket.on('current ip', function(data) {
 <!-- Ethernet Setup -->
 <div class="row companion-advanced" style="display:none">
 	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">
+		<div class="card card-default">
+			<div class="card-header">
 					Ethernet Configuration
-				</h3>
 			</div>
-			<div class="panel-body">
-				<h4 id="ethernet-ip">Current IP:</h4>
+			<div class="card-body">
+				<h5 id="ethernet-ip">Current IP:</h5>
 				<dl class="dl-horizontal">
 					<button type="button" class="btn btn-primary"
 						id="eth0 ip button" onclick="setCompanionEthernetIP()">
 						Change Companion Default Ethernet IP</button>
 				</dl>
 				<dl class="dl-horizontal">
-					<h3> Current Configuration: <span id="current-config"></span></h3>
-					<h3 id="configure"> Companion Network Settings: </h3>
-					<h4><input type="radio" name="config" id="manual"/> Manual (default)</h4>
+					<h5> Current Configuration: <span id="current-config"></span></h5>
+					<h5 id="configure"> Companion Network Settings: </h5>
+					<h5><input type="radio" name="config" id="manual"/> Manual (default)</h5>
 					<b>&emsp;&emsp;The IP address is manually assigned to the Ethernet interface. This is known as a 
 					"static IP address" because the IP address will not change on it's own. The default IP address 
 					for Companion is 192.168.2.2</b>
-					<h4><input type="radio" name="config" id="server"/> DHCP Server</h4>
+					<h5><input type="radio" name="config" id="server"/> DHCP Server</h5>
 					<b>&emsp;&emsp;DHCP Server mode is useful for connecting the ROV to many computers without
 					reconfiguring each computer’s network options. In this mode, the Companion computer will have a
 					static IP address of 192.168.2.2.</b>
-					<h4><input type="radio" name="config" id="client"/> DHCP Client</h4>
+					<h5><input type="radio" name="config" id="client"/> DHCP Client</h5>
 					<b>&emsp;&emsp;DHCP Client mode is useful for connecting the ROV to a network through a router. 
 					The Companion computer will need to be connected to a DHCP server (like a router) on the network 
 					to be assigned an IP address. Log into your router to find/configure the IP address that is 
@@ -348,31 +346,29 @@ socket.on('current ip', function(data) {
 <div id="content">
 	<div class="row">
 		<div class="col-md-12">
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h3 class="panel-title">
+			<div class="card card-default">
+				<div class="card-header">
 						Bandwidth and Latency Testing
-					</h3>
 				</div>
 				
-				<div class="panel-body">
-					<h1>Test Network</h1>
+				<div class="card-body">
+					<h4>Test Network</h4>
 					<!-- <input type="submit" class="btn btn-primary" value="latency" onClick="testLatency()"/> -->
 					<input type="submit" class="btn btn-primary" value="upload" onClick="testUpload()"/>
 					<input type="submit" class="btn btn-primary" value="download" onClick="testDownload()"/>
 				<!--
 					<div>
-						<h2>Latency Results:</h2>
-						<h3 id="latency results"></h6>
+						<h4>Latency Results:</h4>
+						<h5 id="latency results"></h6>
 					</div>
 				-->
 					<div>
-						<h2>Upload Results:</h2>
-						<h3 id="upload results"></h6>
+						<h5>Upload Results:</h5>
+						<h5 id="upload results"></h5>
 					</div>
 					<div>
-						<h2>Download Results:</h2>
-						<h3 id="download results"></h6>
+						<h5>Download Results:</h5>
+						<h5 id="download results"></h5>
 					</div>
 				</div>
 			</div>
