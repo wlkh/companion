@@ -10,6 +10,7 @@ import argparse
 import errno
 import socket
 import time
+import requests
 
 from pymavlink import mavutil
 from brping import PingMessage
@@ -41,6 +42,8 @@ def main():
     """ Main function
     """
 
+    if not is_compatible_ardusub_version():
+        exit(-1)
     ## The time that this script was started
     tboot = time.time()
 
@@ -135,6 +138,27 @@ def main():
                     deviceid = ping_parser.rx_msg.src_device_id
                     confidence = ping_parser.rx_msg.confidence
                     send_distance_data(distance, deviceid, confidence)
+
+
+def is_compatible_ardusub_version():
+    """
+    Checks if the running ardusub version is 4.0.0 or newer
+    (4.0.0 disabled use of rangefinder for depth control)
+    """
+    while True:
+        r = requests.get('http://127.0.0.1:4777/mavlink/AUTOPILOT_VERSION/flight_sw_version')
+        # TO-DO: fix next line when https://github.com/patrickelectric/mavlink2rest/issues/3 is solved
+        if "No valid path" in r.text or r.status_code == 404:
+            print("could not read firmware version, retrying in 5 seconds...")
+            time.sleep(5)
+            continue
+        flight_sw_version = r.json()
+        majorVersion = (flight_sw_version >> (8*3)) & 0xFF # bit-fu to extract major version
+        if majorVersion < 4:
+            print("This driver requires ardusub >= 4.0.0, halting...")
+            return False
+        print("Valid ardusub version found, starting code...")
+        return True
 
 if __name__ == '__main__':
     main()
