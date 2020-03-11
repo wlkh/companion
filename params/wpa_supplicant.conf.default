@@ -1,0 +1,10 @@
+# this header must appear
+# https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=US
+
+#network={
+#    ssid=""
+#    psk=""
+#}
