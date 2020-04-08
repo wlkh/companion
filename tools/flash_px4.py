@@ -82,7 +82,7 @@ if options.file is not None:
 else:
     if(os.system("python -u "+home+"/companion/tools/px_uploader.py --port "
     "/dev/serial/by-id/usb-3D_Robotics_PX4_BL_FMU_v2.x_0-if00,/dev/autopilot "
-    "/tmp/ArduSub-v2.px4") != 0):
+    "/tmp/ardusub.apj") != 0):
                 print "Error flashing pixhawk! Do you have most recent version of companion? Try 'git pull' or scp."
                 exit(1)
 
