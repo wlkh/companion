@@ -29,7 +29,7 @@ if options.fromStdin:
                 signal.alarm(0)
 
                 if fileIn:
-                                file = open("/tmp/ArduSub-v2.px4","w")
+                                file = open("/tmp/ardusub.apj","w")
                                 file.write(fileIn)
                                 file.close()
                                 print "Got firmware file from stdin!"
@@ -48,15 +48,15 @@ else:
                                 firmwareURL = options.url
                                 print "Downloading ArduSub firmware from %s" % firmwareURL
                 elif options.latest:
-                                firmwareURL = "http://firmware.ardupilot.org/Sub/latest/fmuv2/ardusub.apj"
+                                firmwareURL = "https://firmware.ardupilot.org/Sub/latest/Pixhawk1/ardusub.apj"
                                 print "Downloading latest ArduSub firmware from %s" % firmwareURL
                 else:
-                                firmwareURL = "http://firmware.ardupilot.org/Sub/stable/PX4/ArduSub-v2.px4"
+                                firmwareURL = "https://firmware.ardupilot.org/Sub/stable/Pixhawk1/ardusub.apj"
                                 print "Downloading stable ArduSub firmware from %s" % firmwareURL
 
                 try:
                                 firmwarefile = urlopen(firmwareURL)
-                                with open("/tmp/ArduSub-v2.px4", "wb") as local_file:
+                                with open("/tmp/ardusub.apj", "wb") as local_file:
                                     local_file.write(firmwarefile.read())
 
                                 local_file.close()
