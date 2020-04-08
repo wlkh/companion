@@ -1443,7 +1443,7 @@ io.on('connection', function(socket) {
 		logger.log("restore px fw");
 		var cmd = child_process.spawn('/usr/bin/python', ['-u',
 			_companion_directory + '/tools/flash_px4.py',
-			'--file', _companion_directory + '/fw/ArduSub-v2.px4']);
+			'--file', _companion_directory + '/fw/ardusub.apj']);
 
 		cmd.stdout.on('data', function (data) {
 			socket.emit('terminal output', data.toString());
