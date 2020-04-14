@@ -127,3 +127,6 @@ Initial release
 - Mavlink streamrate decreased to avoid high CPU usages
 - Fix problem related to underwater-gps loss of position
 - Fix bug when upgrading Ping devices
+
+0.0.20:
+- Fix URL used to fetch ArduSub from Ardupilot servers
