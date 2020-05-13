@@ -327,6 +327,31 @@ if (( $PRE_0_0_19 > 0 )); then
     # The user should apply the default parameters if he wishs to use all features available
 fi
 
+# Check pre-0.0.21 to merge our updated (0.0.17...0.0.20) default mavproxy configuration
+# with any existing user configuration
+PRE_0_0_21=$(( git rev-list --count --left-right 0.0.21...revert-point || echo 0 ) | cut -f1)
+
+if (( $PRE_0_0_21 > 0 )); then
+    # reconfigure only if a user configuration exists in the home directory
+    USER_MAVPROXY_PARAMS=$HOME/mavproxy.param
+    if [ -e $USER_MAVPROXY_PARAMS ]; then
+        # delete any streamrate line if it already exists
+        sed -i '/--streamrate*/d' $USER_MAVPROXY_PARAMS
+        # append the streamrate line we require
+        sed -i '$ a --streamrate 10' $USER_MAVPROXY_PARAMS
+
+        # delete port for mavlink 2 rest server if it exists
+        # append port for mavlink2rest server, ensuring it occurs only once
+        sed -i '/--out udpout:localhost:9002/d' $USER_MAVPROXY_PARAMS
+        sed -i '$ a --out udpout:localhost:9002' $USER_MAVPROXY_PARAMS
+
+        # delete port for ping-viewer if it exists
+        # append port for ping-viewer, ensuring it occurs only once
+        sed -i '/--out udpin:0.0.0.0:14660/d' $USER_MAVPROXY_PARAMS
+        sed -i '$ a --out udpin:0.0.0.0:14660' $USER_MAVPROXY_PARAMS
+    fi
+fi
+
 echo 'Update Complete, the system will reboot now.'
 echo 'Wait for 30 seconds and refresh the page.'
 
