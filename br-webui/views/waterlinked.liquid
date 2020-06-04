@@ -16,7 +16,25 @@ function restartWLDriver() {
 	}
 	socket.emit('restart WL driver', args);
 }
+updateStatus = function(){
+	 var request = new XMLHttpRequest();
+	request.open('GET', '/serviceStatus?service=waterlinked', true);
 
+	request.onload = function() {
+		if (this.status >= 200 && this.status < 400) {
+			document.getElementById('waterlinked-status').innerHTML = this.response
+			console.log(this.response)
+		}
+	}
+	request.onerror = function() {
+		document.getElementById('waterlinked-status').innerHTML = "Lost connection to Companion"
+	
+	};
+	request.send();
+}
+
+updateStatus();
+setInterval(updateStatus, 1000);
 </script>
 
 <h1>Waterlinked Driver Setup</h1>
@@ -41,6 +59,16 @@ function restartWLDriver() {
 					</div>
 					<button type="button" class="btn btn-primary" onclick="restartWLDriver()">Restart Water Linked Driver</button>
 				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					Status
+				</h3>
+			</div>
+			<div class="panel-body">
+				<h4 id="waterlinked-status"></h4>
 			</div>
 		</div>
 	</div>
