@@ -23,6 +23,11 @@ app.use('/js', express.static(__dirname + '/node_modules/bootstrap-select/dist/j
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap-select/dist/css'));
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap-slider/dist'));
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap-slider/dist/css'));
+var bodyParser = require('body-parser')
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+// Holds the last status message for each service
+var serviceStatus = {}
 
 var fs = require("fs");
 var expressLiquid = require('express-liquid');
@@ -303,6 +308,24 @@ app.get("/screen", function(req, res) {
 		res.send(stdout.toString());
 	});
 });
+
+app.post('/report_service_status', urlencodedParser, function (req, res) {
+	console.log(req.body)
+	var keys = Object.keys(req.body)
+	if (keys.length == 1) {
+		serviceStatus[keys[0]] = req.body[keys[0]]
+	}
+		res.send('Ok')
+  })
+
+app.get('/serviceStatus', function (req, res) {
+	try {
+		var service = req.query.service
+		res.send(serviceStatus[req.query.service])
+	} catch (error) {
+		res.send("N/A")
+	}
+})
 
 var server = app.listen(2770, function() {
 	var host = server.address().address;
