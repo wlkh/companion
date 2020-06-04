@@ -4,11 +4,19 @@ import time
 import socket
 import json
 import argparse
-import grequests
+import requests
 from pymavlink import mavutil
 from datetime import datetime
 from os import system
 import operator
+import urllib2
+from math import floor
+
+STATUS_REPORT_URL = "http://192.168.2.2:2770/report_service_status"
+MAVLINK2REST_URL = "http://192.168.2.2:4777"
+
+# holds the last status so we dont flood it
+last_status = ""
 
 # Nmea messages templates
 # https://www.trimble.com/oem_receiverhelp/v4.44/en/NMEA-0183messages_GGA.html
@@ -60,6 +68,108 @@ gpvtg = ("$GPVTG,"                    # Message ID
                                       # E=Estimated, N=not valid, S=Simulator.
        + "*")                         # Checksum
 
+
+def report_status(*args):
+    """
+    reports the current status of this service
+    """
+    # Do not report the same status multiple times
+    global last_status
+    if args == last_status:
+        return
+    last_status = args
+    print(" ".join(args))
+    try:
+        requests.post(STATUS_REPORT_URL, data={"waterlinked": " ".join(args)})
+    except:
+        print("Unable to talk to webui! Could not report status")
+
+
+def get_mavlink(path):
+    """
+    Helper to get mavlink data from mavlink2rest
+    Example: get_mavlink('/VFR_HUD')
+    Returns the data as text
+    """
+    try:
+        return urllib2.urlopen(MAVLINK2REST_URL + '/mavlink' + path).read()
+    except:
+        report_status("Error trying to access mavlink2rest!")
+        return "0.0"
+
+
+def get_message_frequency(message_name):
+    """
+    Returns the frequency at which message "message_name" is being received, 0 if unavailable
+    """
+    try:
+        return float(get_mavlink('/{0}/message_information/frequency'.format(message_name)))
+    except:
+        return 0.0
+
+
+# TODO: Find a way to run this check for every message received without overhead
+# check https://github.com/patrickelectric/mavlink2rest/issues/9
+def ensure_message_frequency(message_name, frequency):
+    """
+    Makes sure that a mavlink message is being received at least at "frequency" Hertz
+    Returns true if successful, false otherwise
+    """
+    message_name = message_name.upper()
+    current_frequency = get_message_frequency(message_name)
+
+    # load message template from mavlink2rest helper
+    try:
+        data = json.loads(requests.get(MAVLINK2REST_URL + '/helper/message/COMMAND_LONG').text)
+    except:
+        return False
+
+    msg_id = getattr(mavutil.mavlink, 'MAVLINK_MSG_ID_' + message_name)
+    data["message"]["command"] = {"type": 'MAV_CMD_SET_MESSAGE_INTERVAL'}
+    data["message"]["param1"] = msg_id
+    data["message"]["param2"] = int(1000/frequency)
+
+    try:
+        result = requests.post(MAVLINK2REST_URL + '/mavlink', json=data)
+        return result.status_code == 200
+    except Exception as error:
+        report_status("error setting message frequency: " + str(error))
+        return False
+
+
+def set_param(param_name, param_type, param_value):
+    """
+    Sets parameter "param_name" of type param_type to value "value" in the autpilot
+    Returns True if succesful, False otherwise
+    """
+    data = json.loads(requests.get(MAVLINK2REST_URL + '/helper/message/PARAM_SET').text)
+
+    for i, char in enumerate(param_name):
+        data["message"]["param_id"][i] = char
+
+    data["message"]["param_type"] = {"type": param_type}
+    data["message"]["param_value"] = param_value
+
+    try:
+        result = requests.post(MAVLINK2REST_URL + '/mavlink', json=data)
+        return result.status_code == 200
+    except Exception as error:
+        print("error setting parameter: " + str(error))
+        return False
+
+
+def get_depth():
+    return -float(get_mavlink('/VFR_HUD/alt'))
+
+
+def get_orientation():
+    return float(get_mavlink('/VFR_HUD/heading'))
+
+
+def get_temperature():
+    return float(get_mavlink('/SCALED_PRESSURE2/temperature'))/100.0
+
+
 def calculateNmeaChecksum(string):
     """
     Calculates the checksum of an Nmea string
@@ -67,6 +177,7 @@ def calculateNmeaChecksum(string):
     data, checksum = string.split("*")
     calculated_checksum = reduce(operator.xor, bytearray(data[1:]), 0)
     return calculated_checksum
+
 
 def format(message, now=0, lat=0, lon=0, orientation=0):
     """
@@ -79,101 +190,82 @@ def format(message, now=0, lat=0, lon=0, orientation=0):
     lon = abs(lon)
 
     msg = message.format(date=now.strftime("%d%m%y"),
-                       hours=now.hour,
-                       minutes=now.minute,
-                       seconds=(now.second + now.microsecond/1000000.0),
-                       lat=lat,
-                       latmin=(lat % 1) * 60,
-                       latdir=latdir,
-                       lon=lon,
-                       lonmin=(lon % 1) * 60,
-                       londir=londir,
-                       orientation=orientation)
-    return msg +  ("%02x\r\n" % calculateNmeaChecksum(msg)).upper()
+                         hours=now.hour,
+                         minutes=now.minute,
+                         seconds=(now.second + now.microsecond/1000000.0),
+                         lat=floor(lat),
+                         latmin=(lat % 1) * 60,
+                         latdir=latdir,
+                         lon=floor(lon),
+                         lonmin=(lon % 1) * 60,
+                         londir=londir,
+                         orientation=orientation)
+    return msg + ("%02x\r\n" % calculateNmeaChecksum(msg)).upper()
 
 
-# Old mavlink link, used in BR QGC up to 3.2.4-rev6
-master = mavutil.mavlink_connection('udpout:192.168.2.1:14400', source_system=2, source_component=1)
+def setup_streamrates():
+    """
+    Setup message streams to get Orientation(VFR_HUD), Depth(VFR_HUD), and temperature(SCALED_PRESSURE2)
+    """
+    # VFR_HUD at at least 5Hz
+    while not ensure_message_frequency("VFR_HUD", 5):
+        time.sleep(2)
 
-parser = argparse.ArgumentParser(description="Driver for the Water Linked Underwater GPS system.")
-parser.add_argument('--ip', action="store", type=str, default="demo.waterlinked.com", help="remote ip to query on.")
-parser.add_argument('--port', action="store", type=str, default="80", help="remote port to query on.")
-args = parser.parse_args()
+    # SCALED_PRESSURE2 at at least 1Hz
+    while not ensure_message_frequency("SCALED_PRESSURE2", 1):
+        time.sleep(2)
 
-# New approach, UDP port 14401 for nmea data
-qgcNmeaSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-qgcNmeaSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-qgcNmeaSocket.setblocking(0)
 
-connected = False
-while not connected:
-    time.sleep(5)
-    print("scanning for Water Linked underwater GPS...")
-    connected = not system('curl ' + args.ip + ':' + args.port + '/api/v1/about/')
+def wait_for_waterlinked():
+    """
+    Waits until the Underwater GPS system is available
+    Returns when it is found
+    """
+    global gpsUrl
+    while True:
+        report_status("scanning for Water Linked underwater GPS...")
+        try:
+            requests.get(gpsUrl + '/api/v1/about/', timeout=1)
+            break
+        except Exception as error:
+            print(error)
+        time.sleep(5)
 
-print("Found Water Linked underwater GPS!")
-
-system('screen -S mavproxy -p 0 -X stuff "param set GPS_TYPE 14^M"')
-
-sockit = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sockit.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-sockit.setblocking(0)
-sockit.bind(('0.0.0.0', 25102))
-
-gpsUrl = "http://" + args.ip + ":" + args.port
 
 def processMasterPosition(response, *args, **kwargs):
-    print('got master response:', response.text)
-    result = response.json()
+    """
+    Callback to handle the Master position request. This sends the topside position and orientation
+    to QGroundControl via UDP port 14401
+    """
+    #print('got master response:', response.text)
+    result = json.loads(response)
     if 'lat' not in result or 'lon' not in result or 'orientation' not in result:
-        print('master response is not valid:')
-        print(json.dumps(result, indent=4, sort_keys=True))
+        report_status('master(topside) response is not valid:')
         return
-
-    # Old approach, mavlink messages to port 14400
-    master.mav.heartbeat_send(
-        0,                     # type                      : Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM) (uint8_t)
-        1,                     # autopilot                 : Autopilot type / class. defined in MAV_AUTOPILOT ENUM (uint8_t)
-        0,                     # base_mode                 : System mode bitfield, see MAV_MODE_FLAG ENUM in mavlink/include/mavlink_types.h (uint8_t)
-        0,                     # custom_mode               : A bitfield for use for autopilot-specific flags. (uint32_t)
-        0,                     # system_status             : System status flag, see MAV_STATE ENUM (uint8_t)
-        0                      # mavlink_version           : MAVLink version, not writable by user, gets added by protocol because of magic data type: uint8_t_mavlink_version (uint8_t)
-    )
-    master.mav.gps_raw_int_send(
-        0,                     # time_usec                 : Timestamp (microseconds since UNIX epoch or microseconds since system boot) (uint64_t)
-        3,                     # fix_type                  : See the GPS_FIX_TYPE enum. (uint8_t)
-        result['lat'] * 1e7,   # lat                       : Latitude (WGS84), in degrees * 1E7 (int32_t)
-        result['lon'] * 1e7,   # lon                       : Longitude (WGS84), in degrees * 1E7 (int32_t)
-        0,                     # alt                       : Altitude (AMSL, NOT WGS84), in meters * 1000 (positive for up). Note that virtually all GPS modules provide the AMSL altitude in addition to the WGS84 altitude. (int32_t)
-        0,                     # eph                       : GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX (uint16_t)
-        0,                     # epv                       : GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX (uint16_t)
-        0,                     # vel                       : GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX (uint16_t)
-        0,                     # cog                       : Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX (uint16_t)
-        6                      # satellites_visible        : Number of satellites visible. If unknown, set to 255 (uint8_t)
-    )
-    master.mav.vfr_hud_send(
-        0,                     # airspeed                  : Current airspeed in m/s (float)
-        0,                     # groundspeed               : Current ground speed in m/s (float)
-        result['orientation'], # heading                   : Current heading in degrees, in compass units (0..360, 0=north) (int16_t)
-        0,                     # throttle                  : Current throttle setting in integer percent, 0 to 100 (uint16_t)
-        0,                     # alt                       : Current altitude (MSL), in meters (float)
-        0                      # climb                     : Current climb rate in meters/second (float)
-    )
-
     # new approach: nmea messages to port 14401
     try:
-        result = response.json()
         for message in [gpgga, gprmc, gpvtg]:
-            msg = format(message, datetime.now(), result['lat'], result['lon'], orientation=result['orientation'])
+            msg = format(
+                message,
+                datetime.now(),
+                result['lat'],
+                result['lon'],
+                orientation=result['orientation']
+                )
             qgcNmeaSocket.sendto(msg, ('192.168.2.1', 14401))
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        report_status("Error reading master position: {0}".format(error))
+
 
 def processLocatorPosition(response, *args, **kwargs):
-    print('got global response:', response.text)
-    result = response.json()
+    """
+    Callback to handle the Locator position request.
+    Forwards the locator(ROV) position to mavproxy's GPSInput module
+    TODO: Change this too to use mavlink2rest
+    """
+    result = json.loads(response)
     if 'lat' not in result or 'lon' not in result:
-        print('global response is not valid:')
+        report_status('global response is not valid!')
         print(json.dumps(result, indent=4, sort_keys=True))
         return
 
@@ -184,79 +276,86 @@ def processLocatorPosition(response, *args, **kwargs):
     result['vdop'] = 1.0
     result['satellites_visible'] = 10
     result['ignore_flags'] = 8 | 16 | 32
-    result = json.dumps(result);
-    print('sending      ', result)
+    result = json.dumps(result)
+    socket_mavproxy.sendto(result, ('0.0.0.0', 25100))
 
-    sockit.sendto(result, ('0.0.0.0', 25100))
 
-def notifyPutResponse(response, *args, **kwargs):
-    print('PUT response:', response.text)
+# Socket to send GPS data to mavproxy
+socket_mavproxy = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+socket_mavproxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+socket_mavproxy.setblocking(0)
 
-update_period = 0.25
-last_master_update = 0
-last_locator_update = 0
-s = grequests.Session()
-# Thank you https://stackoverflow.com/questions/16015749/in-what-way-is-grequests-asynchronous
-while True:
-    if time.time() > last_locator_update + update_period:
-        last_locator_update = time.time()
-        url = gpsUrl + "/api/v1/position/global"
-        print('requesting data from', url)
-        request = grequests.get(url, session=s, hooks={'response': processLocatorPosition})
-        grequests.send(request)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Driver for the Water Linked Underwater GPS system.")
+    parser.add_argument('--ip', action="store", type=str, default="demo.waterlinked.com", help="remote ip to query on.")
+    parser.add_argument('--port', action="store", type=str, default="80", help="remote port to query on.")
+    args = parser.parse_args()
 
-    if time.time() > last_master_update + update_period:
-        last_master_update = time.time()
-        url = gpsUrl + "/api/v1/position/master"
-        print('requesting data from', url)
-        request = grequests.get(url, session=s, hooks={'response': processMasterPosition})
-        grequests.send(request)
+    # Use UDP port 14401 to send NMEA data to QGC for topside location
+    qgcNmeaSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    qgcNmeaSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    qgcNmeaSocket.setblocking(0)
 
-    try:
-        datagram = sockit.recvfrom(4096)
-        recv_payload = json.loads(datagram[0])
-        if 'depth' not in recv_payload or 'temp' not in recv_payload:
-            print('not valid payload:')
-            print(json.dumps(recv_payload, indent=4, sort_keys=True))
+    gpsUrl = "http://" + args.ip + ":" + args.port
+
+    setup_streamrates()
+
+    wait_for_waterlinked()
+
+    report_status("Running")
+
+    # Sets GPS type to MAVLINK
+    set_param("GPS_TYPE", "MAV_PARAM_TYPE_UINT8", 14)
+
+    # update at 5Hz
+    update_period = 0.25
+    last_master_update = 0
+    last_locator_update = 0
+    last_position_update = 0
+
+    depth_endpoint = gpsUrl + "/api/v1/external/depth"
+    ext_depth = {}
+    orientation_endpoint = gpsUrl + "/api/v1/external/orientation"
+    ext_orientation = {}
+    locator_endpoint = gpsUrl + "/api/v1/position/global"
+    master_endpoint = gpsUrl + "/api/v1/position/master"
+
+    # TODO: upgrade this to async once we have Python >= 3.6
+    while True:
+        time.sleep(0.02)
+        if time.time() > last_locator_update + update_period:
+            last_locator_update = time.time()
+            try:
+                response = urllib2.urlopen(locator_endpoint, timeout=1).read()
+                processLocatorPosition(response)
+            except Exception as error:
+                report_status("Unable to fetch Locator position from Waterlinked API")
+                print(error)
+
+        if time.time() > last_master_update + update_period:
+            last_master_update = time.time()
+            try:
+                response = urllib2.urlopen(master_endpoint, timeout=1).read()
+                processMasterPosition(response)
+            except Exception as error:
+                report_status("Unable to fetch Master position from Waterlinked API")
+                print(error)
+
+        if time.time() < last_position_update + update_period:
             continue
+        try:
+            last_position_update = time.time()
+            # send depth and temprature information
+            ext_depth['depth'] = get_depth()
+            ext_depth['temp'] = get_temperature()
+            # Equivalent
+            # curl -X PUT -H "Content-Type: application/json" -d '{"depth":1,"temp":2}' "http://37.139.8.112:8000/api/v1/external/depth"
+            request = requests.put(depth_endpoint, json=ext_depth, timeout=1)
 
-        # Send depth/temp to external/depth api
-        ext_depth = {}
-        ext_depth['depth'] = max(min(100, recv_payload['depth']), 0)
-        ext_depth['temp'] = max(min(100, recv_payload['temp']), 0)
+            # Send heading to external/orientation api
+            ext_orientation['orientation'] = max(min(360, get_orientation()), 0)
+            request = requests.put(orientation_endpoint, json=ext_orientation, timeout=1)
+            report_status("Running")
 
-        send_payload = json.dumps(ext_depth)
-
-        headers = {'Content-type': 'application/json'}
-
-        url = gpsUrl + "/api/v1/external/depth"
-        print('sending', send_payload, 'to', url)
-
-        # Equivalent
-        # curl -X PUT -H "Content-Type: application/json" -d '{"depth":1,"temp":2}' "http://37.139.8.112:8000/api/v1/external/depth"
-        request = grequests.put(url, session=s, headers=headers, data=send_payload, hooks={'response': notifyPutResponse})
-        grequests.send(request)
-
-        # Send heading to external/orientation api
-        ext_orientation = {}
-        ext_orientation['orientation'] = max(min(360, recv_payload['orientation']), 0)
-
-        send_payload = json.dumps(ext_orientation)
-
-        headers = {'Content-type': 'application/json'}
-
-        url = gpsUrl + "/api/v1/external/orientation"
-        print('sending', send_payload, 'to', url)
-
-        request = grequests.put(url, session=s, headers=headers, data=send_payload, hooks={'response': notifyPutResponse})
-        grequests.send(request)
-
-    except socket.error as e:
-        if e.errno == 11:
-            pass # no data available for udp read
-        else:
-            print(e)
-    except KeyError as e:
-        print("Warning: error getting a key from MAVProxy/DepthOutput:", e.args[0])
-
-    time.sleep(0.02)
+        except Exception as error:
+            report_status("Error: ", str(error))
