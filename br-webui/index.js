@@ -7,6 +7,8 @@ const SocketIOFile = require('socket.io-file');
 var logger = require('tracer').console();
 var os = require("os");
 var home_dir = process.env.HOME
+var httpProxy = require('http-proxy');
+var apiProxy = httpProxy.createProxyServer();
 logger.log('ENVIRONMENT', process.env)
 logger.log('COMPANION_DIR', process.env.COMPANION_DIR)
 logger.log('HOME_DIR', process.env.HOME)
@@ -41,6 +43,18 @@ apiProxy.on('error', function(e) {
 // reverse proxy for network
 app.all("/service/network*", function(req, res) {
 	apiProxy.web(req, res, {target: 'http://localhost:9000/'});
+});
+
+// reverse proxy for mavlink
+// rewrite requests to /api/mavlink to http://localhost:4777/mavlink
+// TODO: this should eventually be done by nginx (which we don't even have)
+apiProxy.on('proxyReq', function(proxyReq, req, res, options){
+	const rewritedPath = req.url.replace('/api/mavlink','/mavlink');
+	proxyReq.path = rewritedPath;
+ });
+
+app.all("/api/mavlink*", function(req, res) {
+    apiProxy.web(req, res, {target: "http://localhost:4777"});
 });
 
 var fs = require("fs");
