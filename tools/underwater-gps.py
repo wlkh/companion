@@ -85,27 +85,33 @@ def report_status(*args):
         print("Unable to talk to webui! Could not report status")
 
 
+def request(url):
+    try:
+        return urllib2.urlopen(url, timeout=1).read()
+    except Exception as error:
+        print(error)
+        return None
+
+
 def get_mavlink(path):
     """
     Helper to get mavlink data from mavlink2rest
     Example: get_mavlink('/VFR_HUD')
     Returns the data as text
     """
-    try:
-        return urllib2.urlopen(MAVLINK2REST_URL + '/mavlink' + path).read()
-    except:
+    response = request(MAVLINK2REST_URL + '/mavlink' + path)
+    if not response:
         report_status("Error trying to access mavlink2rest!")
         return "0.0"
+    return response
 
 
 def get_message_frequency(message_name):
     """
     Returns the frequency at which message "message_name" is being received, 0 if unavailable
     """
-    try:
-        return float(get_mavlink('/{0}/message_information/frequency'.format(message_name)))
-    except:
-        return 0.0
+    return float(get_mavlink('/{0}/message_information/frequency'.format(message_name)))
+
 
 
 # TODO: Find a way to run this check for every message received without overhead
@@ -142,15 +148,15 @@ def set_param(param_name, param_type, param_value):
     Sets parameter "param_name" of type param_type to value "value" in the autpilot
     Returns True if succesful, False otherwise
     """
-    data = json.loads(requests.get(MAVLINK2REST_URL + '/helper/message/PARAM_SET').text)
-
-    for i, char in enumerate(param_name):
-        data["message"]["param_id"][i] = char
-
-    data["message"]["param_type"] = {"type": param_type}
-    data["message"]["param_value"] = param_value
-
     try:
+        data = json.loads(requests.get(MAVLINK2REST_URL + '/helper/message/PARAM_SET').text)
+
+        for i, char in enumerate(param_name):
+            data["message"]["param_id"][i] = char
+
+        data["message"]["param_type"] = {"type": param_type}
+        data["message"]["param_value"] = param_value
+
         result = requests.post(MAVLINK2REST_URL + '/mavlink', json=data)
         return result.status_code == 200
     except Exception as error:
@@ -252,7 +258,7 @@ def processMasterPosition(response, *args, **kwargs):
                 result['lon'],
                 orientation=result['orientation']
                 )
-            qgcNmeaSocket.sendto(msg, ('192.168.2.1', 14401))
+            qgc_nmea_socket.sendto(msg, ('192.168.2.1', 14401))
     except Exception as error:
         report_status("Error reading master position: {0}".format(error))
 
@@ -292,9 +298,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Use UDP port 14401 to send NMEA data to QGC for topside location
-    qgcNmeaSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    qgcNmeaSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    qgcNmeaSocket.setblocking(0)
+    qgc_nmea_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    qgc_nmea_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    qgc_nmea_socket.setblocking(0)
 
     gpsUrl = "http://" + args.ip + ":" + args.port
 
@@ -325,21 +331,21 @@ if __name__ == "__main__":
         time.sleep(0.02)
         if time.time() > last_locator_update + update_period:
             last_locator_update = time.time()
-            try:
-                response = urllib2.urlopen(locator_endpoint, timeout=1).read()
+
+            response = request(locator_endpoint)
+            if response:
                 processLocatorPosition(response)
-            except Exception as error:
+            else:
                 report_status("Unable to fetch Locator position from Waterlinked API")
-                print(error)
 
         if time.time() > last_master_update + update_period:
             last_master_update = time.time()
-            try:
-                response = urllib2.urlopen(master_endpoint, timeout=1).read()
+
+            response = request(master_endpoint)
+            if response:
                 processMasterPosition(response)
-            except Exception as error:
+            else:
                 report_status("Unable to fetch Master position from Waterlinked API")
-                print(error)
 
         if time.time() < last_position_update + update_period:
             continue
@@ -350,11 +356,11 @@ if __name__ == "__main__":
             ext_depth['temp'] = get_temperature()
             # Equivalent
             # curl -X PUT -H "Content-Type: application/json" -d '{"depth":1,"temp":2}' "http://37.139.8.112:8000/api/v1/external/depth"
-            request = requests.put(depth_endpoint, json=ext_depth, timeout=1)
+            requests.put(depth_endpoint, json=ext_depth, timeout=1)
 
             # Send heading to external/orientation api
             ext_orientation['orientation'] = max(min(360, get_orientation()), 0)
-            request = requests.put(orientation_endpoint, json=ext_orientation, timeout=1)
+            requests.put(orientation_endpoint, json=ext_orientation, timeout=1)
             report_status("Running")
 
         except Exception as error:
