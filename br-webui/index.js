@@ -315,7 +315,7 @@ app.post('/report_service_status', urlencodedParser, function (req, res) {
 	if (keys.length == 1) {
 		serviceStatus[keys[0]] = req.body[keys[0]]
 	}
-		res.send('Ok')
+	res.send('Ok')
   })
 
 app.get('/serviceStatus', function (req, res) {
