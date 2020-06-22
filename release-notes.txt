@@ -130,3 +130,10 @@ Initial release
 
 0.0.20:
 - Fix URL used to fetch ArduSub from Ardupilot servers
+
+0.0.21:
+- Fix Ping1D not showing on QGC
+- Fix migration of mavproxy.params to support mavlink2rest and Ping-Viewer integration
+- Set mavproxy.params streamrate if not set
+- Fix Integration of Waterlinked Underwater GPS and ArduSub 4.0
+- Upgrade mavlink2rest to version 0.7.2
