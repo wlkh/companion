@@ -12,8 +12,8 @@ import operator
 import urllib2
 from math import floor
 
-STATUS_REPORT_URL = "http://192.168.2.2:2770/report_service_status"
-MAVLINK2REST_URL = "http://192.168.2.2:4777"
+STATUS_REPORT_URL = "http://127.0.0.1:2770/report_service_status"
+MAVLINK2REST_URL = "http://127.0.0.1:4777"
 
 # holds the last status so we dont flood it
 last_status = ""
@@ -77,10 +77,10 @@ def report_status(*args):
     global last_status
     if args == last_status:
         return
-    last_status = args
     print(" ".join(args))
     try:
         requests.post(STATUS_REPORT_URL, data={"waterlinked": " ".join(args)})
+        last_status = args
     except:
         print("Unable to talk to webui! Could not report status")
 
